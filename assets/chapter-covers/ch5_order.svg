@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="white"/>
+  <polyline points="70.0,420.0 102.7,341.9 194.2,279.3 326.6,244.5 473.4,244.5 605.8,279.3 697.3,341.9 730.0,420.0" fill="none" stroke="#BBBBBB" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Nodes 1-4: done -->
+  <circle cx="70.0" cy="420.0" r="14" fill="#222222" stroke="#222222" stroke-width="2"/>
+  <text x="70.0" y="442.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#222222">CUSTOMER</text>
+  <circle cx="102.7" cy="341.9" r="14" fill="#222222" stroke="#222222" stroke-width="2"/>
+  <text x="102.7" y="363.9" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#222222">REQUEST</text>
+  <circle cx="194.2" cy="279.3" r="14" fill="#222222" stroke="#222222" stroke-width="2"/>
+  <text x="194.2" y="301.3" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#222222">ESTIMATE</text>
+  <circle cx="326.6" cy="244.5" r="14" fill="#222222" stroke="#222222" stroke-width="2"/>
+  <text x="326.6" y="266.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#222222">QUOTE</text>
+  <!-- Node 5: active -->
+  <circle cx="473.4" cy="244.5" r="14" fill="#C0392B" stroke="#C0392B" stroke-width="3"/>
+  <text x="473.4" y="266.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#C0392B">ORDER</text>
+  <!-- Nodes 6-8: inactive -->
+  <circle cx="605.8" cy="279.3" r="14" fill="white" stroke="#BBBBBB" stroke-width="2"/>
+  <text x="605.8" y="301.3" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#AAAAAA">DELIVERY</text>
+  <circle cx="697.3" cy="341.9" r="14" fill="white" stroke="#BBBBBB" stroke-width="2"/>
+  <text x="697.3" y="363.9" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#AAAAAA">ADJUSTMENT</text>
+  <circle cx="730.0" cy="420.0" r="14" fill="white" stroke="#BBBBBB" stroke-width="2"/>
+  <text x="730.0" y="442.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#AAAAAA">RESPONSE</text>
+  <line x1="160" y1="295" x2="355" y2="295" stroke="#C0392B" stroke-width="2"/>
+  <line x1="445" y1="295" x2="640" y2="295" stroke="#C0392B" stroke-width="2"/>
+  <text x="400" y="290" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="32" fill="#666666">The</text>
+  <text x="400" y="390" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="110" font-weight="900" fill="#222222" letter-spacing="-2">THREAD</text>
+</svg>
