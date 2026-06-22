@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Thread — Cover</title>
+<link rel="stylesheet" href="../styles/thread.css">
+<style>
+body { margin:0; padding:0; background:white; }
+.cover-wrap { width:816px; height:1056px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:white; position:relative; }
+.cover-top-rule { width:680px; height:4px; background:#C0392B; margin-bottom:0; }
+.cover-bottom-rule { width:680px; height:4px; background:#C0392B; margin-top:0; }
+.cover-svg-wrap { width:680px; display:flex; align-items:center; justify-content:center; padding:30px 0 10px; }
+.cover-title-wrap { width:680px; text-align:center; padding:0 0 10px; }
+.cover-main-title { font-family:'Arial Black',Arial,sans-serif; font-size:88px; font-weight:900; letter-spacing:-3px; color:#111; line-height:1; display:block; }
+.cover-sub-the { font-family:Georgia,serif; font-style:italic; font-size:38px; color:#888; display:block; margin-bottom:2px; }
+.cover-tagline { font-family:Georgia,serif; font-style:italic; font-size:15px; color:#888; letter-spacing:0.3px; margin:10px 0 0; }
+.cover-subtitle-block { width:680px; text-align:center; margin-top:16px; padding:14px 0; border-top:1px solid #ddd; border-bottom:1px solid #ddd; }
+.cover-subtitle { font-family:Georgia,serif; font-size:16.5px; color:#333; line-height:1.5; }
+.cover-subtitle em { color:#C0392B; font-style:normal; font-weight:700; }
+.cover-meta { width:680px; display:flex; justify-content:space-between; align-items:flex-end; margin-top:28px; }
+.cover-phase { font-family:Arial,sans-serif; font-size:11px; color:#aaa; letter-spacing:1px; text-transform:uppercase; }
+.cover-tiers { font-family:'Courier New',monospace; font-size:12px; color:#C0392B; letter-spacing:1px; }
+</style>
+</head>
+<body>
+<div class="cover-wrap">
+  <div class="cover-top-rule"></div>
+  <div class="cover-svg-wrap">
+    <svg xmlns="http://www.w3.org/2000/svg" width="680" height="320" viewBox="0 0 680 320">
+      <rect width="680" height="320" fill="white"/>
+      <!-- Arc -->
+      <polyline points="50,270 78,210 152,158 264,128 416,128 530,158 604,210 630,270" fill="none" stroke="#C0392B" stroke-width="3" stroke-linejoin="round"/>
+      <!-- Closing arc -->
+      <path d="M 630,270 Q 340,330 50,270" fill="none" stroke="#C0392B" stroke-width="2.5"/>
+      <!-- Nodes -->
+      <circle cx="50" cy="270" r="13" fill="#C0392B"/><text x="50" y="296" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#aaa" letter-spacing="0.5">CUSTOMER</text>
+      <circle cx="78" cy="210" r="13" fill="#C0392B"/><text x="78" y="236" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#aaa">REQUEST</text>
+      <circle cx="152" cy="158" r="13" fill="#C0392B"/><text x="152" y="184" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#aaa">ESTIMATE</text>
+      <circle cx="264" cy="128" r="13" fill="#C0392B"/><text x="264" y="154" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#aaa">QUOTE</text>
+      <circle cx="416" cy="128" r="13" fill="#C0392B"/><text x="416" y="154" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#aaa">ORDER</text>
+      <circle cx="530" cy="158" r="13" fill="#C0392B"/><text x="530" y="184" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#aaa">DELIVERY</text>
+      <circle cx="604" cy="210" r="13" fill="#C0392B"/><text x="604" y="236" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#aaa">ADJUSTMENT</text>
+      <circle cx="630" cy="270" r="13" fill="#C0392B"/><text x="630" y="296" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#aaa">RESPONSE</text>
+    </svg>
+  </div>
+  <div class="cover-title-wrap">
+    <span class="cover-sub-the">The</span>
+    <span class="cover-main-title">THREAD</span>
+    <p class="cover-tagline">Customer Sales Data: A Practical Guide to Building and Using Sales Intelligence</p>
+  </div>
+  <div class="cover-subtitle-block">
+    <p class="cover-subtitle">From a single customer record to a fully operational <em>sales intelligence system</em><br>built across ten chapters, four tiers, and every step of the customer journey.</p>
+  </div>
+  <div class="cover-meta">
+    <span class="cover-phase">Phase I · Textbook</span>
+    <span class="cover-tiers">Tier I · II · III · IV</span>
+  </div>
+  <div class="cover-bottom-rule" style="margin-top:28px;"></div>
+</div>
+</body>
+</html>
