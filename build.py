@@ -6,13 +6,14 @@ Usage:
     python build.py
 
 Requires:
-    pip install weasyprint
+    pip install weasyprint beautifulsoup4
 
 Outputs:
     output/the-thread.pdf
 """
 
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -27,21 +28,66 @@ OUTPUT_DIR = ROOT / "output"
 OUTPUT_FILE = OUTPUT_DIR / "the-thread.pdf"
 
 # Ordered list of HTML files — front matter first, then chapters in sequence
+# Format: (filename, chapter_number_label, chapter_title)
+# chapter_number_label=None means no running header (cover, TOC)
 HTML_FILES = [
-    "00-cover.html",
-    "00-toc.html",
-    "00-introduction.html",
-    "ch1-knowing-your-customer.html",
-    "ch2-capturing-the-request.html",
-    "ch3-estimating-with-confidence.html",
-    "ch4-quoting-for-clarity.html",
-    "ch5-managing-the-order.html",
-    "ch6-delivering-on-the-promise.html",
-    "ch7-when-things-change.html",
-    "ch8-the-customers-voice.html",
-    "ch9-measuring-performance.html",
-    "ch10-building-a-sales-intelligence-system.html",
+    ("00-cover.html",                               None,         None),
+    ("00-toc.html",                                 None,         None),
+    ("00-introduction.html",                        "Introduction", "The Customer's Data Journey"),
+    ("ch1-knowing-your-customer.html",              "Chapter 1",  "Knowing Your Customer"),
+    ("ch2-capturing-the-request.html",              "Chapter 2",  "Capturing the Request"),
+    ("ch3-estimating-with-confidence.html",         "Chapter 3",  "Estimating with Confidence"),
+    ("ch4-quoting-for-clarity.html",                "Chapter 4",  "Quoting for Clarity"),
+    ("ch5-managing-the-order.html",                 "Chapter 5",  "Managing the Order"),
+    ("ch6-delivering-on-the-promise.html",          "Chapter 6",  "Delivering on the Promise"),
+    ("ch7-when-things-change.html",                 "Chapter 7",  "When Things Change"),
+    ("ch8-the-customers-voice.html",                "Chapter 8",  "The Customer's Voice"),
+    ("ch9-measuring-performance.html",              "Chapter 9",  "Measuring Performance"),
+    ("ch10-building-a-sales-intelligence-system.html", "Chapter 10", "Building a Sales Intelligence System"),
 ]
+
+# ---------------------------------------------------------------------------
+# HTML transformation
+# ---------------------------------------------------------------------------
+
+def transform_html(html: str, ch_label: str, ch_title: str) -> str:
+    """
+    Prepare HTML for natural WeasyPrint pagination:
+    - Remove .content-page wrappers (unwrap children)
+    - Remove .page-footer divs
+    - Inject a .running-header div for the CSS running element
+    """
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:
+        print("[ERROR] beautifulsoup4 is required: pip install beautifulsoup4")
+        sys.exit(1)
+
+    soup = BeautifulSoup(html, 'html.parser')
+
+    # Remove all page footer divs
+    for el in soup.find_all('div', class_='page-footer'):
+        el.decompose()
+
+    # Unwrap all content-page containers
+    for el in soup.find_all('div', class_='content-page'):
+        el.unwrap()
+
+    # Inject running header as first child of <body>
+    body = soup.find('body')
+    if body and ch_label:
+        hdr = soup.new_tag('div', attrs={'class': 'running-header'})
+        book = soup.new_tag('span', attrs={'class': 'rh-book'})
+        book.string = 'The Thread'
+        sep = soup.new_tag('span', attrs={'class': 'rh-sep'})
+        sep.string = '  ·  '
+        ch = soup.new_tag('span', attrs={'class': 'rh-chapter'})
+        ch.string = f'{ch_label}: {ch_title}'
+        hdr.append(book); hdr.append(sep); hdr.append(ch)
+        body.insert(0, hdr)
+
+    return str(soup)
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -59,7 +105,7 @@ def check_weasyprint():
 
 def validate_files():
     missing = []
-    for name in HTML_FILES:
+    for name, _, _ in HTML_FILES:
         path = HTML_DIR / name
         if not path.exists():
             missing.append(str(path))
@@ -90,12 +136,22 @@ def build():
     print("  " + "─" * 44)
 
     documents = []
-    for i, name in enumerate(HTML_FILES, 1):
+    for i, (name, ch_label, ch_title) in enumerate(HTML_FILES, 1):
         path = HTML_DIR / name
         label = name.replace(".html", "")
         print(f"  [{i:02d}/{len(HTML_FILES)}] Rendering {label} ...", end="", flush=True)
         t0 = time.time()
-        doc = weasyprint.HTML(filename=str(path)).render()
+
+        # Read and transform HTML
+        raw_html = path.read_text(encoding='utf-8')
+        if ch_label is not None:
+            html = transform_html(raw_html, ch_label, ch_title)
+        else:
+            html = raw_html
+
+        # Render with WeasyPrint (base_url ensures CSS paths resolve correctly)
+        doc = weasyprint.HTML(string=html, base_url=str(path)).render()
+
         elapsed = time.time() - t0
         page_count = len(doc.pages)
         print(f" {page_count}pp ({elapsed:.1f}s)")
@@ -110,7 +166,7 @@ def build():
     for doc in documents:
         all_pages.extend(doc.pages)
 
-    # Write using the first document as the base (carries metadata/fonts)
+    # Write using the first document as the base
     combined = documents[0].copy(pages=all_pages)
     combined.write_pdf(target=str(OUTPUT_FILE))
 
