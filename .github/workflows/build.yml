@@ -12,19 +12,31 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout main
+      - name: Checkout main (full history)
         uses: actions/checkout@v4
         with:
           ref: main
           path: source
+          fetch-depth: 0
+
+      - name: Restore HTML source files
+        # The html/ files were accidentally emptied. Restore them from the last
+        # good commit (e5d18c2) which had the correct content-page structure.
+        # build.py strips content-page wrappers at render time, so the source
+        # stays as original and the transformation happens in-memory.
+        run: |
+          cd source
+          git checkout e5d18c21008ce25f60b7f6cd4c8da85effd6bd7c -- html/
+          echo "HTML files restored:"
+          ls -la html/
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Install WeasyPrint
-        run: pip install weasyprint
+      - name: Install dependencies
+        run: pip install weasyprint beautifulsoup4
 
       - name: Build PDF
         run: |
@@ -64,7 +76,7 @@ jobs:
           </style>
           </head>
           <body>
-          <div class="card">
+          <div class="div">
             <div style="margin-bottom:24px">
               <svg xmlns="http://www.w3.org/2000/svg" width="300" height="100" viewBox="0 0 300 100">
                 <polyline points="15,85 30,60 65,40 110,30 190,30 235,40 270,60 285,85" fill="none" stroke="#C0392B" stroke-width="2.5" stroke-linejoin="round"/>
@@ -79,9 +91,8 @@ jobs:
             <span class="the">The</span>
             <h1>THREAD</h1>
             <p class="subtitle">Customer Sales Data: A Practical Guide<br>to Building and Using Sales Intelligence</p>
-            <p class="meta">101 pages - Tier I-IV - 10 Chapters</p>
+            <p class="meta">Tier I–IV · 10 Chapters</p>
             <a class="btn" href="the-thread.pdf" download="the-thread.pdf">Download PDF</a>
-            <p class="filemeta">the-thread.pdf - 395 KB</p>
           </div>
           </body>
           </html>
