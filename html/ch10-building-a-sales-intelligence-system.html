@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chapter 10: Building a Sales Intelligence System — The Thread</title>
+<link rel="stylesheet" href="../styles/thread.css">
+<style>
+.schema-table { width:100%; border-collapse:collapse; font-size:12.5px; margin-top:6px; }
+.schema-table th { background:#1e1e2e; color:#89dceb; text-align:left; padding:8px 11px; font-family:'Courier New',monospace; font-weight:700; font-size:11px; letter-spacing:1px; }
+.schema-table td { padding:7px 11px; border-bottom:1px solid #eeeeee; font-family:'Courier New',monospace; vertical-align:top; line-height:1.5; }
+.schema-table tr:nth-child(even) td { background:#f9f9f9; }
+.schema-table .col-table { color:#C0392B; font-weight:700; }
+.schema-table .col-note { color:#555; font-family:Arial,sans-serif; font-size:12px; }
+.sql { background:#1e1e2e; color:#cdd6f4; border-radius:6px; padding:14px 18px; font-family:'Courier New',monospace; font-size:12px; line-height:1.7; margin-bottom:6px; }
+.sql .kw { color:#cba6f7; font-weight:bold; }
+.sql .fn { color:#89dceb; }
+.sql .st { color:#a6e3a1; }
+.sql .cm { color:#6c7086; font-style:italic; }
+.sql-label { font-size:13px; font-weight:700; color:#444; margin-bottom:7px; margin-top:20px; }
+.sql-note { font-size:12.5px; color:#666; margin-top:7px; font-style:italic; margin-bottom:4px; }
+.concept-box { background:#fafafa; border-left:4px solid #C0392B; border-radius:3px; padding:14px 18px; margin:14px 0; font-size:13.5px; color:#444; line-height:1.65; }
+.warn-box { background:#FDEDEC; border-left:4px solid #C0392B; border-radius:3px; padding:13px 18px; margin:14px 0; font-size:13.5px; color:#444; line-height:1.65; }
+.warn-box .warn-label { font-weight:700; color:#C0392B; font-size:12px; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:6px; }
+.reflection-list { padding-left:0; list-style:none; margin-top:8px; }
+.reflection-list li { padding:11px 0 11px 20px; border-bottom:1px solid #f0f0f0; font-family:Georgia,serif; font-style:italic; font-size:13.5px; color:#555; line-height:1.65; position:relative; }
+.reflection-list li::before { content:"—"; color:#C0392B; font-style:normal; font-weight:700; position:absolute; left:0; }
+.tier-badge { display:inline-block; padding:2px 7px; border-radius:3px; font-size:10px; font-weight:700; font-family:Arial,sans-serif; letter-spacing:0.5px; margin-right:4px; }
+.tier-i { background:#fdf2f8; color:#6c3483; }
+.tier-ii { background:#eaf4fb; color:#1a5276; }
+.tier-iii { background:#eafaf1; color:#145a32; }
+.tier-iv { background:#fef9e7; color:#7d6608; }
+.layer-grid { width:100%; border-collapse:collapse; margin-top:8px; font-size:12.5px; }
+.layer-grid th { background:#f5f5f5; color:#333; text-align:left; padding:8px 10px; font-family:Arial,sans-serif; font-weight:700; font-size:11px; letter-spacing:0.5px; border-bottom:2px solid #ddd; }
+.layer-grid td { padding:8px 10px; border-bottom:1px solid #eeeeee; vertical-align:top; line-height:1.5; }
+.closer-box { background:#1e1e2e; color:#cdd6f4; border-radius:6px; padding:18px 22px; margin-top:20px; font-family:Georgia,serif; font-style:italic; font-size:14px; line-height:1.75; text-align:center; }
+.closer-box strong { color:#89dceb; font-style:normal; font-family:Arial,sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:10px; }
+</style>
+</head>
+<body>
+<div class="cover-page">
+  <svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+    <rect width="800" height="500" fill="white"/>
+    <!-- Full arc solid, fully connected -->
+    <polyline points="70.0,420.0 102.7,341.9 194.2,279.3 326.6,244.5 473.4,244.5 605.8,279.3 697.3,341.9 730.0,420.0" fill="none" stroke="#C0392B" stroke-width="3" stroke-linejoin="round"/>
+    <!-- Closing arc back to customer - solid red -->
+    <path d="M 730,420 Q 400,490 70,420" fill="none" stroke="#C0392B" stroke-width="2.5"/>
+    <!-- All 8 nodes solid red -->
+    <circle cx="70.0" cy="420.0" r="14" fill="#C0392B" stroke="#C0392B" stroke-width="2"/><text x="70.0" y="442" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#888">CUSTOMER</text>
+    <circle cx="102.7" cy="341.9" r="14" fill="#C0392B" stroke="#C0392B" stroke-width="2"/><text x="102.7" y="363.9" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#888">REQUEST</text>
+    <circle cx="194.2" cy="279.3" r="14" fill="#C0392B" stroke="#C0392B" stroke-width="2"/><text x="194.2" y="301.3" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#888">ESTIMATE</text>
+    <circle cx="326.6" cy="244.5" r="14" fill="#C0392B" stroke="#C0392B" stroke-width="2"/><text x="326.6" y="266.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#888">QUOTE</text>
+    <circle cx="473.4" cy="244.5" r="14" fill="#C0392B" stroke="#C0392B" stroke-width="2"/><text x="473.4" y="266.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#888">ORDER</text>
+    <circle cx="605.8" cy="279.3" r="14" fill="#C0392B" stroke="#C0392B" stroke-width="2"/><text x="605.8" y="301.3" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#888">DELIVERY</text>
+    <circle cx="697.3" cy="341.9" r="14" fill="#C0392B" stroke="#C0392B" stroke-width="2"/><text x="697.3" y="363.9" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#888">ADJUSTMENT</text>
+    <circle cx="730.0" cy="420.0" r="14" fill="#C0392B" stroke="#C0392B" stroke-width="2"/><text x="730.0" y="442" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#888">RESPONSE</text>
+    <!-- KPI layer markers -->
+    <line x1="280" y1="198" x2="280" y2="228" stroke="#C0392B" stroke-width="1.5"/>
+    <line x1="330" y1="188" x2="330" y2="218" stroke="#C0392B" stroke-width="1.5"/>
+    <line x1="400" y1="182" x2="400" y2="218" stroke="#C0392B" stroke-width="1.5"/>
+    <line x1="470" y1="188" x2="470" y2="218" stroke="#C0392B" stroke-width="1.5"/>
+    <line x1="520" y1="198" x2="520" y2="228" stroke="#C0392B" stroke-width="1.5"/>
+    <text x="400" y="172" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" fill="#C0392B" letter-spacing="2">TIER IV · INTELLIGENCE</text>
+    <text x="400" y="290" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="32" fill="#666666">The</text>
+    <text x="400" y="390" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="110" font-weight="900" fill="#222222" letter-spacing="-2">THREAD</text>
+  </svg>
+  <p class="cover-chapter-label">Chapter 10</p>
+  <p class="cover-title">Building a Sales Intelligence System</p>
+  <p class="cover-tier">Tier IV &nbsp;·&nbsp; Full schema assembly, system design, automation, and the living schema</p>
+</div>
+
+<div class="content-page">
+  <div class="business-context"><div class="module-label">What You Have Built</div>
+  <p>Nine chapters ago, the schema had four columns and one table. It could tell you a customer existed. It could not tell you what they asked for, what you offered them, what you committed to, whether you delivered it on time, what changed along the way, how they felt about it, or whether you made money.</p>
+  <p>Now it can answer all of those questions — and connect the answers to each other. The table below is the complete Tier I–IV schema as a single readable object.</p>
+  </div>
+  <div class="module-label" style="margin-top:16px;">Complete Schema</div>
+  <table class="schema-table"><tr><th>Table</th><th>First Tier</th><th>Purpose</th></tr>
+  <tr><td class="col-table">customer</td><td><span class="tier-badge tier-i">I</span></td><td class="col-note">Anchor record; every transaction traces back here</td></tr>
+  <tr><td class="col-table">request</td><td><span class="tier-badge tier-i">I</span></td><td class="col-note">Initial expression of need</td></tr>
+  <tr><td class="col-table">estimate</td><td><span class="tier-badge tier-i">I</span></td><td class="col-note">Internal cost and price assessment</td></tr>
+  <tr><td class="col-table">quote</td><td><span class="tier-badge tier-i">I</span></td><td class="col-note">Formal offer to the customer</td></tr>
+  <tr><td class="col-table">order</td><td><span class="tier-badge tier-i">I</span></td><td class="col-note">Confirmed commitment</td></tr>
+  <tr><td class="col-table">delivery</td><td><span class="tier-badge tier-i">I</span></td><td class="col-note">Record of what was actually delivered and when</td></tr>
+  <tr><td class="col-table">adjustment</td><td><span class="tier-badge tier-i">I</span></td><td class="col-note">Any change to a prior record</td></tr>
+  <tr><td class="col-table">response</td><td><span class="tier-badge tier-i">I</span></td><td class="col-note">Customer reaction after delivery</td></tr>
+  <tr><td class="col-table">sku</td><td><span class="tier-badge tier-ii">II</span></td><td class="col-note">Product and service catalog with cost</td></tr>
+  <tr><td class="col-table">user</td><td><span class="tier-badge tier-ii">II</span></td><td class="col-note">Internal staff; used for assignments, approvals, contacts</td></tr>
+  <tr><td class="col-table">contact</td><td><span class="tier-badge tier-ii">II</span></td><td class="col-note">Customer-side contacts linked to the customer record</td></tr>
+  <tr><td class="col-table">estimate_line</td><td><span class="tier-badge tier-ii">II</span></td><td class="col-note">Line-level detail within an estimate</td></tr>
+  <tr><td class="col-table">quote_line</td><td><span class="tier-badge tier-ii">II</span></td><td class="col-note">Line-level detail within a quote, linked to estimate lines</td></tr>
+  <tr><td class="col-table">order_line</td><td><span class="tier-badge tier-ii">II</span> <span class="tier-badge tier-iii">III</span></td><td class="col-note">Order line detail; fulfillment status updated through Tier III</td></tr>
+  <tr><td class="col-table">period</td><td><span class="tier-badge tier-iv">IV</span></td><td class="col-note">Named, bounded reporting periods with prior-period linkage</td></tr>
+  <tr><td class="col-table">kpi_definition</td><td><span class="tier-badge tier-iv">IV</span></td><td class="col-note">Formal definitions of each KPI, with ownership</td></tr>
+  <tr><td class="col-table">kpi_snapshot</td><td><span class="tier-badge tier-iv">IV</span></td><td class="col-note">Pre-calculated metric values per period, per segment</td></tr>
+  </table>
+  <div class="page-footer">Chapter 10 · Building a Sales Intelligence System &nbsp;&nbsp; 1</div>
+</div>
+
+<div class="content-page">
+  <div class="module-label">Core Concept</div><h2>What a Sales Intelligence System Is</h2>
+  <div class="concept-box"><strong>A dashboard is a presentation layer.</strong> A sales intelligence system is the infrastructure beneath it: the schema that stores transactions, the definitions that govern how those transactions are measured, the processes that keep both current, and the interfaces that put the right information in front of the right people at the right time.<br><br><strong>A report tells you what happened. A system tells you what is happening and flags what needs attention.</strong> The difference is automation, alerts, and freshness — and all three depend on how the schema is populated and maintained.</div>
+  <div class="module-label" style="margin-top:16px;">System Design</div><h2>Four Layers</h2>
+  <table class="layer-grid">
+    <tr><th style="width:20%;">Layer</th><th>Purpose</th><th>Schema Dependency</th></tr>
+    <tr><td><strong>1. Data Capture</strong></td><td>Write accurate, complete records at the moment of the transaction</td><td>Status fields, controlled vocabularies, system-generated timestamps</td></tr>
+    <tr><td><strong>2. Automation</strong></td><td>Trigger status transitions, generate action queues, schedule KPI snapshots</td><td><code>ord_status</code>, <code>del_status</code>, <code>adj_status</code>, <code>per_is_complete</code>, <code>resp_followup_required</code></td></tr>
+    <tr><td><strong>3. CRM Integration</strong></td><td>Present the schema through a user-facing application; write back through controlled interfaces</td><td>All Tier I–III tables (reads); request, quote, adjustment, response (writes)</td></tr>
+    <tr><td><strong>4. Reporting</strong></td><td>Surface KPI snapshots and period-over-period comparisons to decision-makers</td><td><code>kpi_snapshot</code>, <code>period</code>, <code>kpi_definition</code></td></tr>
+  </table>
+  <div class="warn-box" style="margin-top:14px;"><div class="warn-label">⚠ Layer 1 Is the Most Common Failure Point</div>The schema is only as good as the data written into it. <strong>Status fields</strong> should update when the triggering event occurs, not when someone remembers. <strong>Controlled vocabularies</strong> (<code>adj_type</code>, <code>resp_sentiment</code>, <code>resp_category</code>) should be enforced at the application layer — free-text alternatives are a data quality tax paid on every query. <strong>Timestamps</strong> should be system-generated, not user-entered.</div>
+  <div class="module-label" style="margin-top:16px;">Automation Reference</div>
+  <table class="schema-table"><tr><th>Status Transition</th><th>Trigger Event</th><th>Automated Action</th></tr>
+  <tr><td style="font-family:monospace; color:#C0392B;">ord_status → In Progress</td><td class="col-note">First order_line linked to a delivery</td><td class="col-note">Update order status</td></tr>
+  <tr><td style="font-family:monospace; color:#C0392B;">ord_status → Fulfilled</td><td class="col-note">All ord_ln_status = 'Fulfilled'</td><td class="col-note">Update order, set ord_fulfilled_date</td></tr>
+  <tr><td style="font-family:monospace; color:#C0392B;">del_status → Delivered</td><td class="col-note">Carrier or manual confirmation</td><td class="col-note">Update delivery, calculate del_days_variance</td></tr>
+  <tr><td style="font-family:monospace; color:#C0392B;">adj_status → Applied</td><td class="col-note">adj_approved_by populated</td><td class="col-note">Update adjustment, trigger credit if adj_credit_issued = TRUE</td></tr>
+  <tr><td style="font-family:monospace; color:#C0392B;">per_is_complete → TRUE</td><td class="col-note">per_end_date passes</td><td class="col-note">Trigger KPI snapshot calculation for that period</td></tr>
+  </table>
+  <div class="page-footer">Chapter 10 · Building a Sales Intelligence System &nbsp;&nbsp; 2</div>
+</div>
+
+<div class="content-page">
+  <div class="module-label">Core Concept</div><h2>The Living Schema</h2>
+  <p>No schema survives first contact with production unchanged. Three practices separate schemas that remain useful over time from those that accumulate technical debt until they are replaced.</p>
+  <div class="concept-box"><strong>Practice 1 — Changes flow through <code>kpi_definition</code></strong><br>When a KPI definition changes, record the change in <code>kpi_definition</code> before applying it to snapshot calculations. Update <code>kpi_last_reviewed</code>, annotate what changed in the description fields. Historical snapshots are preserved under the prior definition. New snapshots are calculated under the new one. Without this, a trend line that appears to show improvement may actually reflect a redefinition.</div>
+  <div class="concept-box"><strong>Practice 2 — New fields are additive, not overwriting</strong><br>A field no longer populated is deprecated with a note, not deleted — historical records contain it. A table replaced by a more structured version is retained, not dropped. The cost of keeping deprecated fields is low. The cost of losing historical continuity is high. This is the same principle the tier system used throughout this textbook: add, don’t replace.</div>
+  <div class="concept-box"><strong>Practice 3 — Definitions are owned, not assumed</strong><br>Every <code>kpi_definition</code> row has a <code>kpi_owner</code>. Every period definition is loaded by a named process. Every schema change is attributable to a decision. This is not bureaucracy — it is the difference between a schema that is auditable and one that is mysterious. When a number changes unexpectedly, the question is always: <em>was this a change in the business, or a change in how we measured it?</em> A schema with ownership can answer that. One without it cannot.</div>
+  <div class="module-label" style="margin-top:14px;">Action Queue Automation</div>
+  <p style="font-size:13px; color:#555; margin-top:6px;">Several fields in the schema exist specifically to generate action queues, not historical records:</p>
+  <table class="layer-grid" style="font-size:12.5px;">
+    <tr><th style="width:28%;">Field</th><th>What It Generates</th></tr>
+    <tr><td><code>qte_valid_until</code></td><td>Quotes expiring without a linked order — salesperson follow-up list</td></tr>
+    <tr><td><code>adj_status = 'Pending'</code> + <code>adj_initiated_date</code></td><td>Aging approval queue — bottleneck signal for management</td></tr>
+    <tr><td><code>resp_followup_required = TRUE</code> AND <code>resp_resolved = FALSE</code></td><td>Open follow-up task list — surfaced to <code>resp_followup_owner</code></td></tr>
+    <tr><td><code>del_status</code> not updated within N days of <code>del_scheduled_date</code></td><td>Delivery confirmation gap — either a process failure or an actual delivery failure</td></tr>
+  </table>
+  <div class="page-footer">Chapter 10 · Building a Sales Intelligence System &nbsp;&nbsp; 3</div>
+</div>
+
+<div class="content-page">
+  <div class="module-label">Analytical Application</div><h2>Full Customer Intelligence View — Last 12 Months</h2>
+  <p style="font-size:13px; color:#555; margin-bottom:8px;">Assembles order volume, realized margin, on-time rate, adjustment count, and NPS for every active customer in a single query.</p>
+  <div class="sql"><span class="kw">WITH</span> customer_orders <span class="kw">AS</span> (<br>&nbsp;&nbsp;<span class="kw">SELECT</span> o.ord_cust_id,<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">COUNT</span>(<span class="kw">DISTINCT</span> o.ord_id) <span class="kw">AS</span> total_orders,<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">SUM</span>(ol.ord_ln_unit_price * ol.ord_ln_qty_fulfilled) <span class="kw">AS</span> gross_revenue,<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">SUM</span>(s.sku_cost * ol.ord_ln_qty_fulfilled) <span class="kw">AS</span> gross_cost<br>&nbsp;&nbsp;<span class="kw">FROM</span> <span class="st">"order"</span> o<br>&nbsp;&nbsp;<span class="kw">JOIN</span> order_line ol <span class="kw">ON</span> o.ord_id = ol.ord_id<br>&nbsp;&nbsp;<span class="kw">JOIN</span> sku s <span class="kw">ON</span> ol.sku_id = s.sku_id<br>&nbsp;&nbsp;<span class="kw">WHERE</span> o.ord_date &gt;= <span class="fn">CURRENT_DATE</span> - <span class="kw">INTERVAL</span> <span class="st">'12 months'</span><br>&nbsp;&nbsp;<span class="kw">GROUP BY</span> o.ord_cust_id<br>),<br>adjustment_impact <span class="kw">AS</span> (<br>&nbsp;&nbsp;<span class="kw">SELECT</span> o.ord_cust_id,<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">COUNT</span>(<span class="kw">DISTINCT</span> a.adj_id) <span class="kw">AS</span> total_adjustments,<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">SUM</span>(<span class="fn">COALESCE</span>(a.adj_price_delta, 0)) <span class="kw">AS</span> total_price_adj<br>&nbsp;&nbsp;<span class="kw">FROM</span> adjustment a<br>&nbsp;&nbsp;<span class="kw">JOIN</span> <span class="st">"order"</span> o <span class="kw">ON</span> a.adj_ord_id = o.ord_id<br>&nbsp;&nbsp;<span class="kw">WHERE</span> a.adj_status = <span class="st">'Applied'</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">AND</span> o.ord_date &gt;= <span class="fn">CURRENT_DATE</span> - <span class="kw">INTERVAL</span> <span class="st">'12 months'</span><br>&nbsp;&nbsp;<span class="kw">GROUP BY</span> o.ord_cust_id<br>),<br>delivery_performance <span class="kw">AS</span> (<br>&nbsp;&nbsp;<span class="kw">SELECT</span> o.ord_cust_id,<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">COUNT</span>(d.del_id) <span class="kw">AS</span> total_deliveries,<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">COUNT</span>(<span class="kw">CASE WHEN</span> d.del_actual_date &lt;= d.del_promised_date <span class="kw">THEN</span> 1 <span class="kw">END</span>) <span class="kw">AS</span> on_time<br>&nbsp;&nbsp;<span class="kw">FROM</span> delivery d <span class="kw">JOIN</span> <span class="st">"order"</span> o <span class="kw">ON</span> d.del_ord_id = o.ord_id<br>&nbsp;&nbsp;<span class="kw">WHERE</span> d.del_status = <span class="st">'Delivered'</span> <span class="kw">AND</span> d.del_type != <span class="st">'Internal-Transfer'</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">AND</span> o.ord_date &gt;= <span class="fn">CURRENT_DATE</span> - <span class="kw">INTERVAL</span> <span class="st">'12 months'</span><br>&nbsp;&nbsp;<span class="kw">GROUP BY</span> o.ord_cust_id<br>),<br>nps_summary <span class="kw">AS</span> (<br>&nbsp;&nbsp;<span class="kw">SELECT</span> r.cust_id, <span class="kw">ROUND</span>(<span class="kw">AVG</span>(r.resp_nps), 1) <span class="kw">AS</span> avg_nps, <span class="kw">COUNT</span>(r.resp_id) <span class="kw">AS</span> response_count<br>&nbsp;&nbsp;<span class="kw">FROM</span> response r<br>&nbsp;&nbsp;<span class="kw">WHERE</span> r.resp_nps <span class="kw">IS NOT NULL</span> <span class="kw">AND</span> r.resp_date &gt;= <span class="fn">CURRENT_DATE</span> - <span class="kw">INTERVAL</span> <span class="st">'12 months'</span><br>&nbsp;&nbsp;<span class="kw">GROUP BY</span> r.cust_id<br>)<br><span class="kw">SELECT</span> c.cust_id, c.cust_name, c.cust_segment,<br>&nbsp;&nbsp;<span class="fn">COALESCE</span>(co.total_orders, 0) <span class="kw">AS</span> orders_12m,<br>&nbsp;&nbsp;<span class="kw">ROUND</span>(<span class="fn">COALESCE</span>(co.gross_revenue,0) + <span class="fn">COALESCE</span>(ai.total_price_adj,0), 2) <span class="kw">AS</span> realized_revenue,<br>&nbsp;&nbsp;<span class="kw">ROUND</span>((<span class="fn">COALESCE</span>(co.gross_revenue,0)+<span class="fn">COALESCE</span>(ai.total_price_adj,0)-<span class="fn">COALESCE</span>(co.gross_cost,0))<br>&nbsp;&nbsp;&nbsp;&nbsp;/ <span class="fn">NULLIF</span>(<span class="fn">COALESCE</span>(co.gross_revenue,0)+<span class="fn">COALESCE</span>(ai.total_price_adj,0),0)*100, 1) <span class="kw">AS</span> margin_pct,<br>&nbsp;&nbsp;<span class="kw">ROUND</span>(<span class="fn">COALESCE</span>(dp.on_time,0)*100.0/<span class="fn">NULLIF</span>(dp.total_deliveries,0),1) <span class="kw">AS</span> on_time_pct,<br>&nbsp;&nbsp;<span class="fn">COALESCE</span>(ai.total_adjustments,0) <span class="kw">AS</span> adjustments_12m,<br>&nbsp;&nbsp;ns.avg_nps, ns.response_count<br><span class="kw">FROM</span> customer c<br><span class="kw">LEFT JOIN</span> customer_orders co <span class="kw">ON</span> c.cust_id = co.ord_cust_id<br><span class="kw">LEFT JOIN</span> adjustment_impact ai <span class="kw">ON</span> c.cust_id = ai.ord_cust_id<br><span class="kw">LEFT JOIN</span> delivery_performance dp <span class="kw">ON</span> c.cust_id = dp.ord_cust_id<br><span class="kw">LEFT JOIN</span> nps_summary ns <span class="kw">ON</span> c.cust_id = ns.cust_id<br><span class="kw">WHERE</span> co.total_orders &gt; 0<br><span class="kw">ORDER BY</span> realized_revenue <span class="kw">DESC</span>;</div>
+  <p class="sql-note">Five CTEs, one final SELECT. Every signal from the full customer journey assembled into a single customer intelligence row, ordered by realized revenue.</p>
+  <div class="page-footer">Chapter 10 · Building a Sales Intelligence System &nbsp;&nbsp; 4</div>
+</div>
+
+<div class="content-page">
+  <p class="sql-label" style="margin-top:0;">Open action queue — expiring quotes, pending adjustments, open follow-ups in one view</p>
+  <div class="sql"><span class="kw">SELECT</span> <span class="st">'Quote Expiring'</span> <span class="kw">AS</span> action_type, c.cust_name, q.qte_id <span class="kw">AS</span> record_id,<br>&nbsp;&nbsp;q.qte_valid_until <span class="kw">AS</span> due_date,<br>&nbsp;&nbsp;(<span class="fn">julianday</span>(q.qte_valid_until) - <span class="fn">julianday</span>(<span class="st">'now'</span>)) <span class="kw">AS</span> days_remaining,<br>&nbsp;&nbsp;u.user_first_name || <span class="st">' '</span> || u.user_last_name <span class="kw">AS</span> owner<br><span class="kw">FROM</span> quote q <span class="kw">JOIN</span> customer c <span class="kw">ON</span> q.cust_id = c.cust_id<br><span class="kw">LEFT JOIN</span> <span class="st">"user"</span> u <span class="kw">ON</span> q.qte_prepared_by = u.user_id<br><span class="kw">WHERE</span> q.qte_status <span class="kw">NOT IN</span> (<span class="st">'Accepted'</span>,<span class="st">'Cancelled'</span>,<span class="st">'Expired-No-Action'</span>,<span class="st">'Superseded'</span>)<br>&nbsp;&nbsp;<span class="kw">AND</span> q.qte_valid_until &lt;= <span class="fn">CURRENT_DATE</span> + <span class="kw">INTERVAL</span> <span class="st">'14 days'</span><br><span class="kw">UNION ALL</span><br><span class="kw">SELECT</span> <span class="st">'Adjustment Pending Approval'</span>, c.cust_name, a.adj_id,<br>&nbsp;&nbsp;a.adj_initiated_date + <span class="kw">INTERVAL</span> <span class="st">'5 days'</span>,<br>&nbsp;&nbsp;(<span class="fn">julianday</span>(<span class="st">'now'</span>) - <span class="fn">julianday</span>(a.adj_initiated_date)), u.user_first_name || <span class="st">' '</span> || u.user_last_name<br><span class="kw">FROM</span> adjustment a <span class="kw">JOIN</span> <span class="st">"order"</span> o <span class="kw">ON</span> a.adj_ord_id = o.ord_id<br><span class="kw">JOIN</span> customer c <span class="kw">ON</span> o.ord_cust_id = c.cust_id<br><span class="kw">LEFT JOIN</span> <span class="st">"user"</span> u <span class="kw">ON</span> a.adj_approved_by = u.user_id<br><span class="kw">WHERE</span> a.adj_status = <span class="st">'Pending'</span><br><span class="kw">UNION ALL</span><br><span class="kw">SELECT</span> <span class="st">'Response Follow-Up Due'</span>, c.cust_name, r.resp_id,<br>&nbsp;&nbsp;r.resp_date, (<span class="fn">julianday</span>(<span class="st">'now'</span>) - <span class="fn">julianday</span>(r.resp_date)),<br>&nbsp;&nbsp;u.user_first_name || <span class="st">' '</span> || u.user_last_name<br><span class="kw">FROM</span> response r <span class="kw">JOIN</span> customer c <span class="kw">ON</span> r.cust_id = c.cust_id<br><span class="kw">LEFT JOIN</span> <span class="st">"user"</span> u <span class="kw">ON</span> r.resp_followup_owner = u.user_id<br><span class="kw">WHERE</span> r.resp_followup_required = <span class="kw">TRUE</span> <span class="kw">AND</span> r.resp_resolved = <span class="kw">FALSE</span><br><span class="kw">ORDER BY</span> days_remaining <span class="kw">DESC</span>;</div>
+  <p class="sql-label">System health check — data quality and snapshot freshness</p>
+  <div class="sql"><span class="kw">SELECT</span> <span class="st">'Orders with NULL status'</span> <span class="kw">AS</span> check_name, <span class="kw">COUNT</span>(*) <span class="kw">AS</span> issue_count <span class="kw">FROM</span> <span class="st">"order"</span> <span class="kw">WHERE</span> ord_status <span class="kw">IS NULL</span><br><span class="kw">UNION ALL</span><br><span class="kw">SELECT</span> <span class="st">'Deliveries with NULL promised date'</span>, <span class="kw">COUNT</span>(*) <span class="kw">FROM</span> delivery<br>&nbsp;&nbsp;<span class="kw">WHERE</span> del_promised_date <span class="kw">IS NULL</span> <span class="kw">AND</span> del_status != <span class="st">'Cancelled'</span><br><span class="kw">UNION ALL</span><br><span class="kw">SELECT</span> <span class="st">'Applied adjustments with no root cause'</span>, <span class="kw">COUNT</span>(*) <span class="kw">FROM</span> adjustment<br>&nbsp;&nbsp;<span class="kw">WHERE</span> adj_root_cause <span class="kw">IS NULL</span> <span class="kw">AND</span> adj_status = <span class="st">'Applied'</span><br><span class="kw">UNION ALL</span><br><span class="kw">SELECT</span> <span class="st">'Responses: score but no scale'</span>, <span class="kw">COUNT</span>(*) <span class="kw">FROM</span> response<br>&nbsp;&nbsp;<span class="kw">WHERE</span> resp_score <span class="kw">IS NOT NULL</span> <span class="kw">AND</span> resp_score_scale <span class="kw">IS NULL</span><br><span class="kw">UNION ALL</span><br><span class="kw">SELECT</span> <span class="st">'KPI snapshots older than 48h (complete periods)'</span>, <span class="kw">COUNT</span>(*)<br><span class="kw">FROM</span> kpi_snapshot ks <span class="kw">JOIN</span> period p <span class="kw">ON</span> ks.ks_per_id = p.per_id<br><span class="kw">WHERE</span> p.per_is_complete = <span class="kw">TRUE</span> <span class="kw">AND</span> ks.ks_calculated_at &lt; <span class="fn">NOW</span>() - <span class="kw">INTERVAL</span> <span class="st">'48 hours'</span><br><span class="kw">ORDER BY</span> issue_count <span class="kw">DESC</span>;</div>
+  <p class="sql-note">Run this weekly. Any non-zero count is a defined question: a data entry gap, an automation failure, or a snapshot process that didn’t run.</p>
+  <div class="page-footer">Chapter 10 · Building a Sales Intelligence System &nbsp;&nbsp; 5</div>
+</div>
+
+<div class="content-page">
+  <div class="module-label">Reflection</div><h2>Questions Worth Sitting With</h2>
+  <ul class="reflection-list">
+    <li>Of the four system layers — data capture, automation, CRM integration, and reporting — which one is most likely to be the weakest in your organization today? What would break if you audited it honestly?</li>
+    <li>Does your organization currently have a single view across expiring quotes, pending adjustments, and open follow-ups? Or are those three lists maintained separately, by different teams, in different tools?</li>
+    <li>The journey completeness audit surfaces requests with no estimate, estimates with no quote, orders with no delivery. How many records in your current system would that query return? What does the answer tell you about where the customer journey breaks down most often?</li>
+    <li>The living schema practice of preserving deprecated fields rather than deleting them has a cost: a schema that accumulates columns over time. Where does your organization draw that line, and how is the decision made?</li>
+    <li>If the system health check query ran against your database tomorrow, how confident are you in what those counts would be? The answer is a measure of how well you know your own data.</li>
+  </ul>
+  <div class="closer-box">
+    <strong>End of Textbook</strong>
+    You have reached the end of the textbook. The complete Tier I–IV schema is now assembled.
+    The database implementation supporting this model is built in Phase II using Supabase.
+    The CRM application putting this schema to work with live data is available in Phase III.
+  </div>
+  <div class="page-footer">Chapter 10 · Building a Sales Intelligence System &nbsp;&nbsp; 6</div>
+</div>
+</body>
+</html>
