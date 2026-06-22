@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chapter 6: Delivering on the Promise — The Thread</title>
+<link rel="stylesheet" href="../styles/thread.css">
+<style>
+.schema-table { width:100%; border-collapse:collapse; font-size:12.5px; margin-top:6px; }
+.schema-table th { background:#1e1e2e; color:#89dceb; text-align:left; padding:8px 11px; font-family:'Courier New',monospace; font-weight:700; font-size:11px; letter-spacing:1px; }
+.schema-table td { padding:7px 11px; border-bottom:1px solid #eeeeee; font-family:'Courier New',monospace; vertical-align:top; line-height:1.5; }
+.schema-table tr:nth-child(even) td { background:#f9f9f9; }
+.schema-table .col-field { color:#C0392B; font-weight:700; }
+.schema-table .col-note { color:#555; font-family:Arial,sans-serif; font-size:12px; }
+.schema-section { margin-bottom:26px; }
+.schema-section h3 { font-family:Arial,sans-serif; font-size:12.5px; font-weight:700; color:#333; margin:0 0 6px 0; letter-spacing:0.5px; text-transform:uppercase; }
+.sql { background:#1e1e2e; color:#cdd6f4; border-radius:6px; padding:14px 18px; font-family:'Courier New',monospace; font-size:12.5px; line-height:1.7; margin-bottom:6px; }
+.sql .kw { color:#cba6f7; font-weight:bold; }
+.sql .fn { color:#89dceb; }
+.sql .st { color:#a6e3a1; }
+.sql-label { font-size:13px; font-weight:700; color:#444; margin-bottom:7px; margin-top:20px; }
+.sql-note { font-size:12.5px; color:#666; margin-top:7px; font-style:italic; margin-bottom:4px; }
+.reflection-list { padding-left:0; list-style:none; margin-top:8px; }
+.reflection-list li { padding:11px 0 11px 20px; border-bottom:1px solid #f0f0f0; font-family:Georgia,serif; font-style:italic; font-size:13.5px; color:#555; line-height:1.65; position:relative; }
+.reflection-list li::before { content:"—"; color:#C0392B; font-style:normal; font-weight:700; position:absolute; left:0; }
+.concept-box { background:#fafafa; border-left:4px solid #C0392B; border-radius:3px; padding:14px 18px; margin:14px 0; font-size:13.5px; color:#444; line-height:1.65; }
+.tier-badge { display:inline-block; padding:2px 7px; border-radius:3px; font-size:10px; font-weight:700; font-family:Arial,sans-serif; letter-spacing:0.5px; margin-right:4px; }
+.tier-iii { background:#fde8e8; color:#a01a1a; }
+</style>
+</head>
+<body>
+<div class="cover-page">
+  <svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+    <rect width="800" height="500" fill="white"/>
+    <polyline points="70.0,420.0 102.7,341.9 194.2,279.3 326.6,244.5 473.4,244.5 605.8,279.3 697.3,341.9 730.0,420.0" fill="none" stroke="#BBBBBB" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="70.0" cy="420.0" r="14" fill="white" stroke="#BBBBBB" stroke-width="2"/><text x="70.0" y="442" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#AAAAAA">CUSTOMER</text>
+    <circle cx="102.7" cy="341.9" r="14" fill="white" stroke="#BBBBBB" stroke-width="2"/><text x="102.7" y="363.9" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#AAAAAA">REQUEST</text>
+    <circle cx="194.2" cy="279.3" r="14" fill="white" stroke="#BBBBBB" stroke-width="2"/><text x="194.2" y="301.3" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#AAAAAA">ESTIMATE</text>
+    <circle cx="326.6" cy="244.5" r="14" fill="white" stroke="#BBBBBB" stroke-width="2"/><text x="326.6" y="266.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#AAAAAA">QUOTE</text>
+    <circle cx="473.4" cy="244.5" r="14" fill="white" stroke="#BBBBBB" stroke-width="2"/><text x="473.4" y="266.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#AAAAAA">ORDER</text>
+    <circle cx="605.8" cy="279.3" r="14" fill="#C0392B" stroke="#C0392B" stroke-width="3"/><text x="605.8" y="301.3" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="bold" fill="#C0392B">DELIVERY</text>
+    <circle cx="697.3" cy="341.9" r="14" fill="white" stroke="#BBBBBB" stroke-width="2"/><text x="697.3" y="363.9" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#AAAAAA">ADJUSTMENT</text>
+    <circle cx="730.0" cy="420.0" r="14" fill="white" stroke="#BBBBBB" stroke-width="2"/><text x="730.0" y="442" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#AAAAAA">RESPONSE</text>
+    <line x1="530" y1="265" x2="578" y2="268" stroke="#C0392B" stroke-width="2"/>
+    <line x1="633" y1="272" x2="675" y2="309" stroke="#C0392B" stroke-width="2"/>
+    <text x="400" y="290" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="32" fill="#666666">The</text>
+    <text x="400" y="390" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="110" font-weight="900" fill="#222222" letter-spacing="-2">THREAD</text>
+  </svg>
+  <p class="cover-chapter-label">Chapter 6</p>
+  <p class="cover-title">Delivering on the Promise</p>
+  <p class="cover-tier">Tier III &nbsp;·&nbsp; Delivery tracking, actual vs. promised dates, carrier data, partial shipments</p>
+</div>
+<div class="content-page">
+  <div class="business-context">
+    <div class="module-label">Business Context</div>
+    <h2>The First Backward-Looking Record</h2>
+    <p>The order described what your organization committed to. The delivery describes what actually happened. Every date comparison discussed in previous chapters — requested vs. promised, promised vs. scheduled — has been forward-looking. The delivery record is the first backward-looking entry in the journey: it captures reality, not intention.</p>
+    <p>It is also the first record your customer experiences directly. They do not see your estimate, your internal margin calculations, or your scheduling variance. They see whether the product arrived, in the right quantity, on the date they needed it. That asymmetry — between what you measured internally and what the customer experienced externally — is what makes the delivery table analytically powerful and operationally critical.</p>
+    <p>The single most valuable calculation in delivery analytics is also the simplest: <code>del_date − ord_promised_date</code>. Positive means late. Negative means early. Zero means on time. But this calculation only works if both dates are in the data and linked to the same record. The foreign key <code>ord_id</code> on the delivery record is what connects them — transforming every delivery record from a log entry into a performance measurement.</p>
+  </div>
+  <div class="data-gap" style="margin-top:20px;">
+    <div class="module-label">The Data Gap</div>
+    <h2>What You Can't Answer with Tier I</h2>
+    <ul>
+      <li>Was this delivery on time relative to the promised date — or the customer's original request?</li>
+      <li>Did the delivery fulfill the entire order, or only part of it?</li>
+      <li>Which specific order lines were included in this shipment?</li>
+      <li>Who carried it, and by what method?</li>
+      <li>If there were multiple deliveries against one order, which one completed it?</li>
+      <li>Was anything delivered that was not on the order?</li>
+    </ul>
+    <p style="font-size:13.5px;color:#555;margin-top:10px;">A complete delivery record captures four things: <strong>when</strong> (actual delivery date), <strong>what</strong> (which order lines, in what quantities), <strong>how</strong> (carrier, method, tracking reference), and <strong>against what commitment</strong> (the promised date being measured against). The Tier I record had only the first. Tier III adds the rest.</p>
+  </div>
+  <div class="page-footer">Chapter 6 · Delivering on the Promise &nbsp;&nbsp; 1</div>
+</div>
+<div class="content-page">
+  <div class="schema-section" style="margin-bottom:22px;">
+    <div class="module-label">Schema Additions</div>
+    <h2>Tier III: Delivery Table</h2>
+    <table class="schema-table"><tr><th>Column</th><th>Attribute</th><th>Notes</th></tr><tr><td class="col-field">del_type</td><td>Delivery Type</td><td class="col-note"><span class="tier-badge tier-iii">III</span> Full · Partial · Final-Partial — whether this shipment closes the order</td></tr><tr><td class="col-field">del_carrier</td><td>Carrier Name</td><td class="col-note"><span class="tier-badge tier-iii">III</span> Shipping carrier or internal delivery resource</td></tr><tr><td class="col-field">del_method</td><td>Delivery Method</td><td class="col-note"><span class="tier-badge tier-iii">III</span> Ground · Express · Freight · Internal · Courier</td></tr><tr><td class="col-field">del_tracking</td><td>Tracking Reference</td><td class="col-note"><span class="tier-badge tier-iii">III</span> Carrier tracking number or internal shipment ID; audit trail field</td></tr><tr><td class="col-field">del_notes</td><td>Delivery Notes</td><td class="col-note"><span class="tier-badge tier-iii">III</span> Access issues, substitutions, condition on arrival</td></tr></table>
+  </div>
+  <div style="margin-bottom:22px;">
+    <div class="module-label">Core Concept</div>
+    <h2><code>del_type</code>: Knowing Whether the Order Is Done</h2>
+    <p>The most operationally important field in this table answers the question every operations and customer service team asks when a shipment goes out: <em>does this close the order?</em></p>
+    <div class="concept-box"><strong>Full</strong> — this single delivery fulfills the entire order<br><strong>Partial</strong> — this delivery fulfills some lines but more shipments are expected<br><strong>Final-Partial</strong> — this is the last shipment; it may not have fulfilled every line completely (back-orders cancelled, substitutions accepted), but the order is considered closed<br><br><code>Final-Partial</code> is the structurally important edge case. It closes the order even when fulfillment was incomplete — capturing the real-world reality that not every order ends with 100% of every line shipped.</div>
+  </div>
+  <div>
+    <div class="module-label">Core Concept</div>
+    <h2>New Table: <code>delivery_line</code></h2>
+    <p>For full delivery tracking — particularly in multi-shipment orders — a <code>delivery_line</code> table records which specific order lines were included in each shipment, and in what quantity. This is the Tier III extension of the line-item pattern established in Chapters 3, 4, and 5.</p>
+    <table class="schema-table"><tr><th>Column</th><th>Attribute</th><th>Notes</th></tr><tr><td class="col-field">del_ln_id</td><td>Delivery Line ID</td><td class="col-note"><span class="tier-badge tier-iii">III</span> Primary key</td></tr><tr><td class="col-field">del_id</td><td>Delivery ID</td><td class="col-note"><span class="tier-badge tier-iii">III</span> FK → delivery.del_id</td></tr><tr><td class="col-field">ord_ln_id</td><td>Order Line ID</td><td class="col-note"><span class="tier-badge tier-iii">III</span> FK → order_line.ord_ln_id; which order line this delivery line fulfills</td></tr><tr><td class="col-field">del_ln_qty</td><td>Quantity Delivered</td><td class="col-note"><span class="tier-badge tier-iii">III</span> Units delivered in this shipment for this line</td></tr><tr><td class="col-field">del_ln_notes</td><td>Line Notes</td><td class="col-note"><span class="tier-badge tier-iii">III</span> Substitutions, damages, short-ships specific to this line</td></tr></table>
+    <p style="font-size:13px;color:#555;margin-top:10px;">When a <code>delivery_line</code> record is created, it triggers an update to the corresponding <code>order_line</code>: <code>ord_ln_qty_fulfilled</code> increases by <code>del_ln_qty</code>, and <code>ord_ln_status</code> is recalculated. When all order lines reach Fulfilled — or a <code>Final-Partial</code> delivery is recorded — the parent order transitions to Fulfilled and <code>ord_fulfilled_date</code> is stamped. This is the trigger chain described in Chapter 5, now shown in its operational context.</p>
+  </div>
+  <div class="page-footer">Chapter 6 · Delivering on the Promise &nbsp;&nbsp; 2</div>
+</div>
+<div class="content-page">
+  <div style="margin-bottom:22px;">
+    <div class="module-label">Core Concept</div>
+    <h2>Multi-Shipment Orders</h2>
+    <p>Partial delivery is not a failure state — it is a normal operational pattern. Each delivery against an order creates a new <code>delivery</code> header and corresponding <code>delivery_line</code> rows. The order's fulfillment state is the aggregate of all delivery lines against all order lines.</p>
+    <div class="concept-box"><strong>Example — order with three lines (50 + 20 + 10 units):</strong><br><br>First delivery: Lines 1 and 2 ship in full. <code>del_type = Partial</code>. Order status: Partial.<br>Second delivery: Line 3 ships. <code>del_type = Final-Partial</code> (or Full). Order status: Fulfilled. <code>ord_fulfilled_date</code> stamped.<br><br>Without <code>delivery_line</code>, the second delivery looks identical to the first — a timestamp against an order ID. With <code>delivery_line</code>, you can reconstruct the complete fulfillment sequence, line by line, shipment by shipment.</div>
+  </div>
+  <div>
+    <div class="module-label">Connects Forward</div>
+    <h2>The Boundary Between Internal and External</h2>
+    <p>The delivery table sits at the boundary between your internal operations and your customer's reality. Every date comparison it enables — actual vs. promised, actual vs. requested — is a measure of the gap between your commitment and the customer's experience.</p>
+    <ul>
+      <li><strong>Chapter 7 — Adjustment:</strong> When a delivery falls short, the adjustment is the mechanism for correcting the record and the relationship. The delivery record is the evidence the adjustment references.</li>
+      <li><strong>Chapter 8 — Response:</strong> The response record captures how the customer reacted. The delivery record captures what they reacted to. Together, they form the complete feedback loop.</li>
+    </ul>
+    <p style="font-size:13px;color:#555;margin-top:10px;"><code>del_carrier</code> and <code>del_date</code>, consistently captured, make carrier performance analysis possible — surfacing which carriers are consistently late and where logistics contracts may need renegotiation.</p>
+  </div>
+  <div class="page-footer">Chapter 6 · Delivering on the Promise &nbsp;&nbsp; 3</div>
+</div>
+<div class="content-page">
+  <div class="module-label">Analytical Application</div>
+  <h2>Queries That Become Possible</h2>
+  <p class="sql-label">On-time delivery rate by month</p>
+  <div class="sql"><span class="kw">SELECT</span><br>&nbsp;&nbsp;<span class="fn">DATE_TRUNC</span>(<span class="st">'month'</span>, d.del_date) <span class="kw">AS</span> delivery_month,<br>&nbsp;&nbsp;<span class="kw">COUNT</span>(d.del_id) <span class="kw">AS</span> total_deliveries,<br>&nbsp;&nbsp;<span class="kw">COUNT</span>(<span class="kw">CASE WHEN</span> d.del_date &lt;= o.ord_promised_date <span class="kw">THEN</span> 1 <span class="kw">END</span>) <span class="kw">AS</span> on_time,<br>&nbsp;&nbsp;<span class="kw">ROUND</span>(<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">COUNT</span>(<span class="kw">CASE WHEN</span> d.del_date &lt;= o.ord_promised_date <span class="kw">THEN</span> 1 <span class="kw">END</span>)::<span class="fn">decimal</span><br>&nbsp;&nbsp;&nbsp;&nbsp;/ <span class="fn">NULLIF</span>(<span class="kw">COUNT</span>(d.del_id), 0) * 100, 1<br>&nbsp;&nbsp;) <span class="kw">AS</span> on_time_pct<br><span class="kw">FROM</span> delivery d<br><span class="kw">JOIN</span> <span class="st">"order"</span> o <span class="kw">ON</span> d.ord_id = o.ord_id<br><span class="kw">WHERE</span> o.ord_promised_date <span class="kw">IS NOT NULL</span><br><span class="kw">GROUP BY</span> <span class="fn">DATE_TRUNC</span>(<span class="st">'month'</span>, d.del_date)<br><span class="kw">ORDER BY</span> delivery_month <span class="kw">ASC</span>;</div>
+  <p class="sql-label">On-time delivery rate by carrier</p>
+  <div class="sql"><span class="kw">SELECT</span> d.del_carrier, d.del_method,<br>&nbsp;&nbsp;<span class="kw">COUNT</span>(d.del_id) <span class="kw">AS</span> total_deliveries,<br>&nbsp;&nbsp;<span class="kw">COUNT</span>(<span class="kw">CASE WHEN</span> d.del_date &lt;= o.ord_promised_date <span class="kw">THEN</span> 1 <span class="kw">END</span>) <span class="kw">AS</span> on_time,<br>&nbsp;&nbsp;<span class="kw">ROUND</span>(<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">COUNT</span>(<span class="kw">CASE WHEN</span> d.del_date &lt;= o.ord_promised_date <span class="kw">THEN</span> 1 <span class="kw">END</span>)::<span class="fn">decimal</span><br>&nbsp;&nbsp;&nbsp;&nbsp;/ <span class="fn">NULLIF</span>(<span class="kw">COUNT</span>(d.del_id), 0) * 100, 1<br>&nbsp;&nbsp;) <span class="kw">AS</span> on_time_pct,<br>&nbsp;&nbsp;<span class="kw">ROUND</span>(<span class="fn">AVG</span>(d.del_date - o.ord_promised_date), 1) <span class="kw">AS</span> avg_days_variance<br><span class="kw">FROM</span> delivery d<br><span class="kw">JOIN</span> <span class="st">"order"</span> o <span class="kw">ON</span> d.ord_id = o.ord_id<br><span class="kw">WHERE</span> d.del_carrier <span class="kw">IS NOT NULL</span> <span class="kw">AND</span> o.ord_promised_date <span class="kw">IS NOT NULL</span><br><span class="kw">GROUP BY</span> d.del_carrier, d.del_method<br><span class="kw">ORDER BY</span> on_time_pct <span class="kw">DESC</span>;</div>
+  <p class="sql-note">avg_days_variance is the richer signal — 85% on-time with +12 days average variance is more damaging than 90% on-time with +4 days.</p>
+  <p class="sql-label">Full delivery journey: requested → promised → actual</p>
+  <div class="sql"><span class="kw">SELECT</span> o.ord_id, c.cust_name,<br>&nbsp;&nbsp;r.req_delivery_date <span class="kw">AS</span> customer_requested,<br>&nbsp;&nbsp;o.ord_promised_date <span class="kw">AS</span> promised,<br>&nbsp;&nbsp;d.del_date <span class="kw">AS</span> actual,<br>&nbsp;&nbsp;o.ord_promised_date - r.req_delivery_date <span class="kw">AS</span> promise_gap_days,<br>&nbsp;&nbsp;d.del_date - o.ord_promised_date <span class="kw">AS</span> delivery_variance_days,<br>&nbsp;&nbsp;d.del_date - r.req_delivery_date <span class="kw">AS</span> total_gap_from_request<br><span class="kw">FROM</span> delivery d<br><span class="kw">JOIN</span> <span class="st">"order"</span> o <span class="kw">ON</span> d.ord_id = o.ord_id<br><span class="kw">JOIN</span> request r <span class="kw">ON</span> o.req_id = r.req_id<br><span class="kw">JOIN</span> customer c <span class="kw">ON</span> o.cust_id = c.cust_id<br><span class="kw">WHERE</span> d.del_type <span class="kw">IN</span> (<span class="st">'Full'</span>, <span class="st">'Final-Partial'</span>)<br><span class="kw">ORDER BY</span> total_gap_from_request <span class="kw">DESC</span>;</div>
+  <p class="sql-note">Filters to Full and Final-Partial ensures one row per closed order. total_gap_from_request is the number that matters most to the customer.</p>
+  <div class="page-footer">Chapter 6 · Delivering on the Promise &nbsp;&nbsp; 4</div>
+</div>
+<div class="content-page">
+  <p class="sql-label" style="margin-top:0;">Multi-shipment orders: delivery count and completion timeline</p>
+  <div class="sql"><span class="kw">SELECT</span> o.ord_id, c.cust_name,<br>&nbsp;&nbsp;<span class="kw">COUNT</span>(d.del_id) <span class="kw">AS</span> delivery_count,<br>&nbsp;&nbsp;<span class="kw">MIN</span>(d.del_date) <span class="kw">AS</span> first_delivery,<br>&nbsp;&nbsp;<span class="kw">MAX</span>(d.del_date) <span class="kw">AS</span> final_delivery,<br>&nbsp;&nbsp;<span class="kw">MAX</span>(d.del_date) - <span class="kw">MIN</span>(d.del_date) <span class="kw">AS</span> fulfillment_span_days,<br>&nbsp;&nbsp;o.ord_promised_date,<br>&nbsp;&nbsp;<span class="kw">MAX</span>(d.del_date) - o.ord_promised_date <span class="kw">AS</span> final_delivery_variance<br><span class="kw">FROM</span> delivery d<br><span class="kw">JOIN</span> <span class="st">"order"</span> o <span class="kw">ON</span> d.ord_id = o.ord_id<br><span class="kw">JOIN</span> customer c <span class="kw">ON</span> o.cust_id = c.cust_id<br><span class="kw">GROUP BY</span> o.ord_id, c.cust_name, o.ord_promised_date<br><span class="kw">HAVING</span> <span class="kw">COUNT</span>(d.del_id) &gt; 1<br><span class="kw">ORDER BY</span> delivery_count <span class="kw">DESC</span>, fulfillment_span_days <span class="kw">DESC</span>;</div>
+  <p class="sql-label">Line-level fulfillment completeness</p>
+  <div class="sql"><span class="kw">SELECT</span> ol.ord_ln_id, o.ord_id, c.cust_name, s.sku_code, s.sku_name,<br>&nbsp;&nbsp;ol.ord_ln_qty_ordered,<br>&nbsp;&nbsp;<span class="fn">COALESCE</span>(<span class="kw">SUM</span>(dl.del_ln_qty), 0) <span class="kw">AS</span> qty_delivered,<br>&nbsp;&nbsp;ol.ord_ln_qty_ordered - <span class="fn">COALESCE</span>(<span class="kw">SUM</span>(dl.del_ln_qty), 0) <span class="kw">AS</span> qty_shortfall,<br>&nbsp;&nbsp;ol.ord_ln_status<br><span class="kw">FROM</span> order_line ol<br><span class="kw">JOIN</span> <span class="st">"order"</span> o <span class="kw">ON</span> ol.ord_id = o.ord_id<br><span class="kw">JOIN</span> customer c <span class="kw">ON</span> o.cust_id = c.cust_id<br><span class="kw">JOIN</span> sku s <span class="kw">ON</span> ol.sku_id = s.sku_id<br><span class="kw">LEFT JOIN</span> delivery_line dl <span class="kw">ON</span> ol.ord_ln_id = dl.ord_ln_id<br><span class="kw">GROUP BY</span> ol.ord_ln_id, o.ord_id, c.cust_name, s.sku_code, s.sku_name, ol.ord_ln_qty_ordered, ol.ord_ln_status<br><span class="kw">HAVING</span> ol.ord_ln_qty_ordered &gt; <span class="fn">COALESCE</span>(<span class="kw">SUM</span>(dl.del_ln_qty), 0)<br><span class="kw">ORDER BY</span> qty_shortfall <span class="kw">DESC</span>;</div>
+  <p class="sql-note">The shortfall column feeds directly into the adjustment analysis in Chapter 7.</p>
+  <div class="module-label" style="margin-top:22px;">Reflection</div>
+  <h2>Questions Worth Sitting With</h2>
+  <ul class="reflection-list">
+    <li>Think about the last delivery complaint you received from a customer. Was the issue a late delivery, a partial delivery, or something else? Is that distinction visible in your current data?</li>
+    <li>Your organization likely uses more than one carrier. Do you currently have a way to compare on-time performance across carriers by method? What decisions are being made about logistics contracts without that data?</li>
+    <li>Consider an order that required three deliveries to complete. In your current system, is it possible to reconstruct the sequence — which lines shipped when, in what quantities, and which delivery closed the order?</li>
+    <li>The del_type field distinguishes Full, Partial, and Final-Partial. Think about a recent order that closed without everything being delivered. How was that closure recorded? Where did the shortfall go?</li>
+    <li>Think about a recent case where a delivery triggered a correction. What data would you need from the delivery record to support that adjustment clearly?</li>
+  </ul>
+  <div class="page-footer">Chapter 6 · Delivering on the Promise &nbsp;&nbsp; 5</div>
+</div>
+</body>
+</html>
