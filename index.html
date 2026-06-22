@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Download — The Thread</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Arial,sans-serif; background:#f0f0f0; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+.card { background:white; border-radius:10px; padding:52px 60px; text-align:center; box-shadow:0 4px 24px rgba(0,0,0,0.10); max-width:500px; width:100%; }
+.label { font-size:11px; letter-spacing:3px; color:#aaa; text-transform:uppercase; font-weight:700; margin-bottom:10px; }
+h1 { font-family:'Arial Black',Arial,sans-serif; font-size:52px; font-weight:900; color:#111; letter-spacing:-2px; line-height:1; margin-bottom:4px; }
+.the { font-family:Georgia,serif; font-style:italic; font-size:22px; color:#999; display:block; margin-bottom:2px; }
+.subtitle { font-family:Georgia,serif; font-style:italic; font-size:13.5px; color:#999; line-height:1.5; margin:12px 0 6px; }
+.meta { font-size:11.5px; color:#ccc; margin-bottom:32px; letter-spacing:0.5px; }
+.btn { display:inline-block; background:#C0392B; color:white; text-decoration:none; padding:15px 40px; border-radius:6px; font-weight:700; font-size:15px; }
+.filemeta { margin-top:14px; font-size:11px; color:#ddd; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div style="margin-bottom:24px;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="300" height="100" viewBox="0 0 300 100">
+      <polyline points="15,85 30,60 65,40 110,30 190,30 235,40 270,60 285,85" fill="none" stroke="#C0392B" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M 285,85 Q 150,112 15,85" fill="none" stroke="#C0392B" stroke-width="2"/>
+      <circle cx="15" cy="85" r="5" fill="#C0392B"/><circle cx="30" cy="60" r="5" fill="#C0392B"/>
+      <circle cx="65" cy="40" r="5" fill="#C0392B"/><circle cx="110" cy="30" r="5" fill="#C0392B"/>
+      <circle cx="190" cy="30" r="5" fill="#C0392B"/><circle cx="235" cy="40" r="5" fill="#C0392B"/>
+      <circle cx="270" cy="60" r="5" fill="#C0392B"/><circle cx="285" cy="85" r="5" fill="#C0392B"/>
+    </svg>
+  </div>
+  <div class="label">Phase I &nbsp;&middot;&nbsp; Textbook</div>
+  <span class="the">The</span>
+  <h1>THREAD</h1>
+  <p class="subtitle">Customer Sales Data: A Practical Guide<br>to Building and Using Sales Intelligence</p>
+  <p class="meta">101 pages &nbsp;&middot;&nbsp; Tier I–IV &nbsp;&middot;&nbsp; 10 Chapters</p>
+  <a class="btn" id="dl">&#11015;&nbsp; Loading PDF...</a>
+  <p class="filemeta">the-thread.pdf &nbsp;&middot;&nbsp; 395 KB</p>
+</div>
+<script>
+const b64='PDF_DATA_PLACEHOLDER';
+const btn=document.getElementById('dl');
+btn.href='data:application/pdf;base64,'+b64;
+btn.download='the-thread.pdf';
+btn.textContent='\u2b07\u00a0Download PDF';
+</script>
+</body>
+</html>
