@@ -1,0 +1,176 @@
+/* ============================================
+   THE THREAD — PDF Stylesheet
+   Locked template v1.0
+   ============================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #222222;
+  background: #fff;
+  width: 816px;
+}
+
+/* ── PAGE BLOCKS ── */
+.cover-page {
+  width: 816px;
+  height: 1056px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border-bottom: 4px solid #C0392B;
+  padding: 60px;
+  page-break-after: always;
+}
+.cover-page svg { width: 100%; max-width: 680px; }
+.cover-chapter-label {
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: #AAAAAA;
+  text-transform: uppercase;
+  margin-top: 36px;
+  font-weight: 700;
+}
+.cover-title {
+  font-family: 'Arial Black', Arial, sans-serif;
+  font-size: 34px;
+  font-weight: 900;
+  color: #222222;
+  margin-top: 10px;
+  text-align: center;
+}
+.cover-tier {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+  color: #666666;
+  margin-top: 10px;
+}
+
+.content-page {
+  width: 816px;
+  height: 1056px;
+  padding: 56px 68px;
+  overflow: hidden;
+  page-break-after: always;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── MODULE LABELS ── */
+.module-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #AAAAAA;
+  margin-bottom: 5px;
+}
+
+h2 {
+  font-family: 'Arial Black', Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  color: #222222;
+  margin-bottom: 8px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #eeeeee;
+}
+
+p { margin-bottom: 10px; }
+p:last-child { margin-bottom: 0; }
+
+code {
+  font-family: 'Courier New', monospace;
+  background: #f0f0f0;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+/* ── SECTION MODULES ── */
+
+/* Business Context — red left border */
+.business-context {
+  border-left: 4px solid #C0392B;
+  padding-left: 16px;
+}
+
+/* Data Gap — gray background */
+.data-gap {
+  background: #F5F5F5;
+  border-radius: 6px;
+  padding: 16px 20px;
+}
+.data-gap ul {
+  padding-left: 18px;
+  margin-top: 6px;
+}
+.data-gap li { margin-bottom: 5px; font-size: 14px; }
+
+/* Schema — dark code block */
+.schema {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border-radius: 6px;
+  padding: 16px 20px;
+  font-family: 'Courier New', monospace;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.schema .fn { color: #89dceb; }
+.schema .ft { color: #a6e3a1; }
+.schema .cm { color: #7f849c; font-style: italic; }
+
+/* Watch Out — red callout */
+.watch-out {
+  background: #FDEDEC;
+  border-left: 4px solid #C0392B;
+  border-radius: 0 6px 6px 0;
+  padding: 13px 18px;
+}
+.callout-icon {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.watch-out .callout-icon { color: #C0392B; }
+
+/* Key Concept — warm yellow */
+.key-concept {
+  background: #FFFBEA;
+  border-left: 4px solid #F0B429;
+  border-radius: 0 6px 6px 0;
+  padding: 13px 18px;
+}
+.key-concept .callout-icon { color: #B7791F; }
+
+/* Reflection — italic close */
+.reflection {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 14.5px;
+  color: #666666;
+  border-top: 1px solid #eeeeee;
+  border-bottom: 1px solid #eeeeee;
+  padding: 16px 28px;
+  margin-top: auto;
+}
+
+/* Page footer */
+.page-footer {
+  margin-top: auto;
+  font-size: 11px;
+  color: #BBBBBB;
+  text-align: right;
+  padding-top: 10px;
+  border-top: 1px solid #eeeeee;
+}
